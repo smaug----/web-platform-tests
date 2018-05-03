@@ -1,0 +1,6 @@
+<script>
+  if (window.opener)
+    window.opener.postMessage("Message", "*");
+  else
+    window.top.postMessage("Message", "*");
+</script>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="/resources/testharness.js"></script>
+    <script src="/resources/testharnessreport.js"></script>
+    <script src='../support/logTest.sub.js?logs=["Message"]'></script>
+</head>
+
+<body>
+    <script>
+      window.onmessage = function(e) {
+        log(e.data);
+      };
+
+      w = window.open("support/sandboxed-post-message-to-parent.html?sandbox=allow-scripts","","width=400,height=400");
+      w.onload = new w.Function('window.opener.postMessage("Message2", "*");');
+    </script>
+</body>
+
+</html>
