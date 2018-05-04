@@ -100,12 +100,21 @@
         await wait_for_state(t, sw, 'activated');
         const values = await getScriptTimes(sw, testName);
 
+        const frame = await with_iframe(SCOPE);
+        const reg_in_frame = await frame.contentWindow.navigator.serviceWorker.getRegistration(normalizeURL(SCOPE));
+        assert_equals(reg_in_frame.updateViaCache, updateViaCache1 || 'imports', "reg_in_frame.updateViaCache");
+
         opts = {scope: SCOPE};
         if (updateViaCache2) opts.updateViaCache = updateViaCache2;
 
         await navigator.serviceWorker.register(fullScriptUrl, opts);
 
         assert_equals(reg.updateViaCache, updateViaCache2 || 'imports', "reg.updateViaCache updated");
+        // The updateViaCache change on an existing registration should be
+        // propagated to all corresponding JS registration objects.
+        wait_for_activation_on_dummy_scope(t, frame.contentWindow);
+        assert_equals(reg_in_frame.updateViaCache, updateViaCache2 || 'imports', "reg_in_frame.updateViaCache updated");
+        frame.remove();
 
         // If the update happens via the cache, the scripts will come back byte-identical.
         // We bypass the byte-identical check if the script URL has changed, but not if
@@ -141,6 +150,33 @@
         await cleanup();
       }, testName);
     }
+  }
+
+  // Test accessing updateViaCache of an unregistered registration.
+  for (const updateViaCache of UPDATE_VIA_CACHE_VALUES) {
+    const testName = `access-updateViaCache-after-unregister-${updateViaCache}`;
+
+    promise_test(async t => {
+      await cleanup();
+
+      const opts = {scope: SCOPE};
+
+      if (updateViaCache) opts.updateViaCache = updateViaCache;
+
+      const reg = await navigator.serviceWorker.register(
+        `${SCRIPT_URL}?test=${testName}`,
+        opts
+      );
+
+      assert_equals(reg.updateViaCache, updateViaCache || 'imports', "reg.updateViaCache");
+
+      await reg.unregister();
+
+      // Keep the original value.
+      assert_equals(reg.updateViaCache, updateViaCache || 'imports', "reg.updateViaCache");
+
+      await cleanup();
+    }, testName);
   }
 
 </script>
