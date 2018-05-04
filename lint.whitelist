@@ -925,6 +925,9 @@ WEBIDL2.JS: .gitmodules
 # Manual test that uses console.logs for feedback
 CONSOLE: payment-request/payment-request-response-id.html
 
+# semi-legitimate use of console.* in webaudio tests.
+CONSOLE: webaudio/resources/audit.js:39
+
 # Tests that use WebKit/Blink testing APIs
 LAYOUTTESTS APIS: css/css-regions/interactivity/*
 
